@@ -19,13 +19,30 @@ API_TOKEN = config['token_lichess']
 
 # Function to get the daily puzzle from Lichess
 def get_daily_puzzle(api_token):
-    url = "https://lichess.org/api/puzzle/daily"
+    url = "https://lichess.org/api/puzzle/8GWW9"
     headers = {
         "Authorization": f"Bearer {api_token}"
     }
     response = requests.get(url, headers=headers)
     response.raise_for_status()
     return response.json()
+
+# Function to get the solution from the daily puzzle
+def get_solution(daily_puzzle, initial_ply):
+    solution_moves = daily_puzzle['puzzle']['solution']
+    pgn = daily_puzzle['game']['pgn']
+    pgn_io = StringIO(pgn)
+    game = chess.pgn.read_game(pgn_io)
+    board = game.board()
+    
+    for move in list(game.mainline_moves())[:initial_ply]:
+        board.push(move)
+    
+    for move in solution_moves:
+        move_obj = chess.Move.from_uci(move)
+        board.push(move_obj)
+    
+    return board.fen()
 
 # Function to create a chessboard image from FEN string
 def create_chessboard_image(fen, output_file, size=800):
@@ -34,8 +51,8 @@ def create_chessboard_image(fen, output_file, size=800):
         board, 
         size=size,
         colors={
-            'square light': '#FFFFFF',  # white
-            'square dark': '#97a976',  # black
+            'square light': '#E2F9DD',  # white
+            'square dark': '#80A379',  # black
             # 'square dark': '#0000FF',   # blue
         }
     )
@@ -54,7 +71,8 @@ def main():
     
     # Parse the PGN to get the initial board position
     pgn = daily_puzzle['game']['pgn']
-    initial_ply = daily_puzzle['puzzle']['initialPly']
+     # +1 needs to include initial move
+    initial_ply = daily_puzzle['puzzle']['initialPly'] + 1
     
     # Read the PGN and get the board position at the given ply
     pgn_io = StringIO(pgn)
@@ -62,7 +80,7 @@ def main():
     board = game.board()
     
     for move in list(game.mainline_moves())[:initial_ply]:
-        print(move)
+        # print(move)
         board.push(move)
     
     # Get the FEN string for the position at initial_ply
@@ -74,6 +92,12 @@ def main():
     # Create the chessboard image with higher resolution
     create_chessboard_image(puzzle_fen, output_file, size=800)
     print(f'Daily puzzle image saved as {output_file}')
+
+    # Get the final position after the solution and save it
+    final_solution_fen = get_solution(daily_puzzle, initial_ply)
+    output_file_solution = 'final_solution.png'
+    create_chessboard_image(final_solution_fen, output_file_solution, size=800)
+    print(f'Final solution image saved as {output_file_solution}')
 
 if __name__ == "__main__":
     main()
