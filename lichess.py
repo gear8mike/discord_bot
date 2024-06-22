@@ -19,7 +19,7 @@ API_TOKEN = config['token_lichess']
 
 # Function to get the daily puzzle from Lichess
 def get_daily_puzzle(api_token):
-    url = "https://lichess.org/api/puzzle/8GWW9"
+    url = "https://lichess.org/api/puzzle/daily"
     headers = {
         "Authorization": f"Bearer {api_token}"
     }
@@ -45,16 +45,16 @@ def get_solution(daily_puzzle, initial_ply):
     return board.fen()
 
 # Function to create a chessboard image from FEN string
-def create_chessboard_image(fen, output_file, size=800):
+def create_chessboard_image(fen, output_file, size=800, flipped=False):
     board = chess.Board(fen)
     svg_board = chess.svg.board(
         board, 
         size=size,
         colors={
             'square light': '#E2F9DD',  # white
-            'square dark': '#80A379',  # black
-            # 'square dark': '#0000FF',   # blue
-        }
+            'square dark': '#80A379',  # dark green
+        },
+        orientation=chess.BLACK if flipped else chess.WHITE
     )
     svg2png(bytestring=svg_board, write_to=output_file)
 
@@ -71,7 +71,6 @@ def main():
     
     # Parse the PGN to get the initial board position
     pgn = daily_puzzle['game']['pgn']
-     # +1 needs to include initial move
     initial_ply = daily_puzzle['puzzle']['initialPly'] + 1
     
     # Read the PGN and get the board position at the given ply
@@ -80,24 +79,27 @@ def main():
     board = game.board()
     
     for move in list(game.mainline_moves())[:initial_ply]:
-        # print(move)
         board.push(move)
+    
+    # Determine if the board should be flipped
+    flipped = board.turn == chess.BLACK
     
     # Get the FEN string for the position at initial_ply
     puzzle_fen = board.fen()
     
-    # Define the output image file
+    # Define the output image file for the initial puzzle position
     output_file = 'daily_puzzle.png'
     
     # Create the chessboard image with higher resolution
-    create_chessboard_image(puzzle_fen, output_file, size=800)
+    create_chessboard_image(puzzle_fen, output_file, size=800, flipped=flipped)
     print(f'Daily puzzle image saved as {output_file}')
 
     # Get the final position after the solution and save it
     final_solution_fen = get_solution(daily_puzzle, initial_ply)
     output_file_solution = 'final_solution.png'
-    create_chessboard_image(final_solution_fen, output_file_solution, size=800)
+    create_chessboard_image(final_solution_fen, output_file_solution, size=800, flipped=flipped)
     print(f'Final solution image saved as {output_file_solution}')
 
 if __name__ == "__main__":
     main()
+
