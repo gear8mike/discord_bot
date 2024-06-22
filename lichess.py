@@ -3,7 +3,7 @@ import chess
 import chess.svg
 import chess.pgn
 from cairosvg import svg2png
-from json import load
+from json import load, dump
 from os import path
 from io import StringIO
 
@@ -45,6 +45,12 @@ def create_chessboard_image(fen, output_file, size=800):
 def main():
     # Get the daily puzzle
     daily_puzzle = get_daily_puzzle(API_TOKEN)
+
+    # Save the JSON data to a file
+    json_output_file = path.join(CURRENT_DIR, 'daily_puzzle.json')
+    with open(json_output_file, 'w') as json_file:
+        dump(daily_puzzle, json_file, indent=4)
+    print(f'Daily puzzle JSON saved as {json_output_file}')
     
     # Parse the PGN to get the initial board position
     pgn = daily_puzzle['game']['pgn']
@@ -56,6 +62,7 @@ def main():
     board = game.board()
     
     for move in list(game.mainline_moves())[:initial_ply]:
+        print(move)
         board.push(move)
     
     # Get the FEN string for the position at initial_ply
