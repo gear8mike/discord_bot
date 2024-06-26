@@ -1,2 +1,6 @@
-config.json
+*.json
 __pycache__/
+*.png
+*.csv
+./puzzles
+*.zst

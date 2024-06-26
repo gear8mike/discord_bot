@@ -28,9 +28,9 @@ def get_daily_puzzle(api_token):
     return response.json()
 
 # Function to get the solution from the daily puzzle
-def get_solution(daily_puzzle, initial_ply):
-    solution_moves = daily_puzzle['puzzle']['solution']
-    pgn = daily_puzzle['game']['pgn']
+def get_solution(puzzle, initial_ply):
+    solution_moves = puzzle['puzzle']['solution']
+    pgn = puzzle['game']['pgn']
     pgn_io = StringIO(pgn)
     game = chess.pgn.read_game(pgn_io)
     board = game.board()
@@ -59,19 +59,19 @@ def create_chessboard_image(fen, output_file, size=800, flipped=False):
     svg2png(bytestring=svg_board, write_to=output_file)
 
 # Main function
-def main():
+def create_puzzle(type="daily_puzzle.png"):
     # Get the daily puzzle
-    daily_puzzle = get_daily_puzzle(API_TOKEN)
+    puzzle = get_daily_puzzle(API_TOKEN)
 
     # Save the JSON data to a file
-    json_output_file = path.join(CURRENT_DIR, 'daily_puzzle.json')
+    json_output_file = path.join(CURRENT_DIR, 'puzzle.json')
     with open(json_output_file, 'w') as json_file:
-        dump(daily_puzzle, json_file, indent=4)
-    print(f'Daily puzzle JSON saved as {json_output_file}')
+        dump(puzzle, json_file, indent=4)
+    print(f'The puzzle JSON saved as {json_output_file}')
     
     # Parse the PGN to get the initial board position
-    pgn = daily_puzzle['game']['pgn']
-    initial_ply = daily_puzzle['puzzle']['initialPly'] + 1
+    pgn = puzzle['game']['pgn']
+    initial_ply = puzzle['puzzle']['initialPly'] + 1
     
     # Read the PGN and get the board position at the given ply
     pgn_io = StringIO(pgn)
@@ -87,19 +87,16 @@ def main():
     # Get the FEN string for the position at initial_ply
     puzzle_fen = board.fen()
     
-    # Define the output image file for the initial puzzle position
-    output_file = 'daily_puzzle.png'
-    
     # Create the chessboard image with higher resolution
-    create_chessboard_image(puzzle_fen, output_file, size=800, flipped=flipped)
-    print(f'Daily puzzle image saved as {output_file}')
+    create_chessboard_image(puzzle_fen, type, size=800, flipped=flipped)
+    print(f'Daily puzzle image saved as {type}')
 
     # Get the final position after the solution and save it
-    final_solution_fen = get_solution(daily_puzzle, initial_ply)
-    output_file_solution = 'final_solution.png'
+    final_solution_fen = get_solution(puzzle, initial_ply)
+    output_file_solution = 'solution.png'
     create_chessboard_image(final_solution_fen, output_file_solution, size=800, flipped=flipped)
     print(f'Final solution image saved as {output_file_solution}')
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
 
