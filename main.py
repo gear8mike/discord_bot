@@ -149,7 +149,7 @@ async def get_response(message, user_input):
         "/themes",
     ]
     try:
-        if lowered == "/help":
+        if "/help" in lowered:
             return print_commands(list_of_commands)
         elif "/daily puzzle" in lowered:
             create_puzzle(df=puzzles_df)
