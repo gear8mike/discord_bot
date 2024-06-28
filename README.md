@@ -13,3 +13,4 @@ It has next commands:
 *https://lichess.org/training/ID*
 * `/moves` -- show the total number of moves including both sides
 * `/rating` -- show the puzzle rating
+* `/themes` -- show the list of themes releated to the puzzle

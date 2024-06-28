@@ -146,6 +146,7 @@ async def get_response(message, user_input):
         "/id",
         "/moves",
         "/rating",
+        "/themes",
     ]
     try:
         if lowered == "/help":
@@ -174,6 +175,10 @@ async def get_response(message, user_input):
             info = load_config(path.join(CURRENT_DIR, "puzzle.json"))
             rating = info["puzzle"]["rating"]
             return f"Puzzle rating is {rating}, good luck!"
+        elif "/themes" in lowered:
+            info = load_config(path.join(CURRENT_DIR, "puzzle.json"))
+            themes = info["puzzle"]["themes"]
+            return f"Puzzle themes are {themes}, good luck!"
         elif "/solution" in lowered:
             await post_puzzle(message, path.join(CURRENT_DIR, "solution.png"))
             return "The right solution is here, check with your!"
