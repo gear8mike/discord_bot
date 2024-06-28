@@ -22,8 +22,8 @@ API_TOKEN = config["token_lichess"]
 
 
 # Function to get the daily puzzle from Lichess
-def get_daily_puzzle(api_token):
-    url = "https://lichess.org/api/puzzle/daily"
+def get_puzzle(api_token, puzzle_id="daily"):
+    url = "https://lichess.org/api/puzzle/" + puzzle_id
     headers = {"Authorization": f"Bearer {api_token}"}
     response = requests.get(url, headers=headers)
     response.raise_for_status()
@@ -49,8 +49,8 @@ def get_solution(puzzle, initial_ply):
 
 
 # Function to get a random puzzle from CSV file within a rating range
-def get_random_puzzle_from_csv(filepath, min_rating=1800, max_rating=2000):
-    df = pd.read_csv(filepath)
+def get_random_puzzle_from_csv(df, min_rating, max_rating):
+    # df = pd.read_csv(filepath)
     filtered_puzzles = df[(df["Rating"] >= min_rating) & (df["Rating"] <= max_rating)]
     if filtered_puzzles.empty:
         raise ValueError(
@@ -75,9 +75,16 @@ def create_chessboard_image(fen, output_file, size=800, flipped=False):
 
 
 # Main function
-def create_puzzle(type="daily_puzzle.png"):
+def create_puzzle(df, type="daily_puzzle.png", rating= 1800):
     # Get the daily puzzle
-    puzzle = get_daily_puzzle(API_TOKEN)
+    if type == "daily_puzzle.png":
+        puzzle = get_puzzle(API_TOKEN)
+    else:
+        # csv_filepath=path.join(CURRENT_DIR, "puzzles", "lichess_db_puzzle.csv")
+        puzzle_random = get_random_puzzle_from_csv(df,rating - 100, rating + 100)
+        puzzle_id = str(puzzle_random['PuzzleId'])
+        print(f'Chosen PuzzleId: {puzzle_id}')
+        puzzle = get_puzzle(API_TOKEN, puzzle_id=puzzle_id)
 
     # Save the JSON data to a file
     json_output_file = path.join(CURRENT_DIR, "puzzle.json")
@@ -105,7 +112,7 @@ def create_puzzle(type="daily_puzzle.png"):
 
     # Create the chessboard image with higher resolution
     create_chessboard_image(puzzle_fen, type, size=800, flipped=flipped)
-    print(f"Daily puzzle image saved as {type}")
+    print(f"Your puzzle image saved as {type}")
 
     # Get the final position after the solution and save it
     final_solution_fen = get_solution(puzzle, initial_ply)
@@ -116,39 +123,39 @@ def create_puzzle(type="daily_puzzle.png"):
     print(f"Final solution image saved as {output_file_solution}")
 
 
-def create_random_puzzle_from_csv(
-    csv_filepath=path.join(CURRENT_DIR, "puzzles", "lichess_db_puzzle.csv"),
-    output_file="puzzle.png",
-    solution_file="solution.png",
-):
-    # Get a random puzzle from the CSV file within the specified rating range
-    puzzle = get_random_puzzle_from_csv(csv_filepath)
+# def create_random_puzzle_from_csv(
+#     csv_filepath=path.join(CURRENT_DIR, "puzzles", "lichess_db_puzzle.csv"),
+#     output_file="puzzle.png",
+#     solution_file="solution.png",
+# ):
+#     # Get a random puzzle from the CSV file within the specified rating range
+#     puzzle = get_random_puzzle_from_csv(csv_filepath)
 
-    # Print the PuzzleId
-    puzzle_id = puzzle['PuzzleId']
-    print(f'Chosen PuzzleId: {puzzle_id}')
+#     # Print the PuzzleId
+#     puzzle_id = puzzle['PuzzleId']
+#     print(f'Chosen PuzzleId: {puzzle_id}')
 
-    # Extract puzzle details
-    fen = puzzle["FEN"]
-    solution_moves = puzzle["Moves"].split()
+#     # Extract puzzle details
+#     fen = puzzle["FEN"]
+#     solution_moves = puzzle["Moves"].split()
 
-    # Create the chessboard image with higher resolution
-    flipped = chess.Board(fen).turn == chess.BLACK
-    create_chessboard_image(fen, output_file, size=800, flipped=flipped)
-    print(f"Puzzle image saved as {output_file}")
+#     # Create the chessboard image with higher resolution
+#     flipped = chess.Board(fen).turn == chess.BLACK
+#     create_chessboard_image(fen, output_file, size=800, flipped=flipped)
+#     print(f"Puzzle image saved as {output_file}")
 
-    # Apply the solution moves to the board
-    board = chess.Board(fen)
-    for move in solution_moves:
-        move_obj = chess.Move.from_uci(move)
-        board.push(move_obj)
+#     # Apply the solution moves to the board
+#     board = chess.Board(fen)
+#     for move in solution_moves:
+#         move_obj = chess.Move.from_uci(move)
+#         board.push(move_obj)
 
-    # Create the final solution image
-    final_solution_fen = board.fen()
-    create_chessboard_image(
-        final_solution_fen, solution_file, size=800, flipped=flipped
-    )
-    print(f"Solution image saved as {solution_file}")
+#     # Create the final solution image
+#     final_solution_fen = board.fen()
+#     create_chessboard_image(
+#         final_solution_fen, solution_file, size=800, flipped=flipped
+#     )
+#     print(f"Solution image saved as {solution_file}")
 
 
 # Example usage
