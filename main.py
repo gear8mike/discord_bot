@@ -149,37 +149,37 @@ async def get_response(message, user_input):
         "/themes",
     ]
     try:
-        if "/help" in lowered:
+        if "/help" == lowered:
             return print_commands(list_of_commands)
-        elif "/daily puzzle" in lowered:
+        elif "/daily puzzle" == lowered:
             create_puzzle(df=puzzles_df)
             await post_puzzle(message, path.join(CURRENT_DIR, "daily_puzzle.png"))
             return "Here is the daily puzzle from lichess.org"
-        elif "/hello" in lowered:
+        elif "/hello" == lowered:
             return "Hello Buddy!"
-        elif "/roll dice" in lowered:
+        elif "/roll dice" == lowered:
             return f"You rolled a dice: {randint(1, 6)}"
         # elif "/puzzle" in lowered:
         #     create_puzzle(df = puzzles_df, type="puzzle.png")
         #     await post_puzzle(message, path.join(CURRENT_DIR, 'puzzle.png'))
         #     return "Here is your random puzzle, enjoy!"
-        elif "/moves" in lowered:
+        elif "/moves" == lowered:
             info = load_config(path.join(CURRENT_DIR, "puzzle.json"))
             moves = len(info["puzzle"]["solution"])
             return f"Total number of moves is {moves}, good luck!"
-        elif "/id" in lowered:
+        elif "/id" == lowered:
             info = load_config(path.join(CURRENT_DIR, "puzzle.json"))
             id = info["puzzle"]["id"]
             return f"Puzzle ID is {id}, good luck!"
-        elif "/rating" in lowered:
+        elif "/rating" == lowered:
             info = load_config(path.join(CURRENT_DIR, "puzzle.json"))
             rating = info["puzzle"]["rating"]
             return f"Puzzle rating is {rating}, good luck!"
-        elif "/themes" in lowered:
+        elif "/themes" == lowered:
             info = load_config(path.join(CURRENT_DIR, "puzzle.json"))
             themes = info["puzzle"]["themes"]
             return f"Puzzle themes are {themes}, good luck!"
-        elif "/solution" in lowered:
+        elif "/solution" == lowered:
             await post_puzzle(message, path.join(CURRENT_DIR, "solution.png"))
             return "The right solution is here, check with your!"
     except Exception as e:
