@@ -66,8 +66,8 @@ def create_chessboard_image(fen, output_file, size=800, flipped=False):
         board,
         size=size,
         colors={
-            "square light": "#E2F9DD",  # white
-            "square dark": "#80A379",  # dark green
+            "square light": "#f3f8e2",  # white
+            "square dark": "#82a15e",  # dark green
         },
         orientation=chess.BLACK if flipped else chess.WHITE,
     )
